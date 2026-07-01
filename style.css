@@ -1,59 +1,189 @@
+:root {
+  --bg: #0e0e0e;
+  --fg: #fbfbfb;
+  --muted: #777;
+}
+
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
 body {
-  background:#0e0e0e;
-  font-family: "Open Sans", "lucida grande", "Segoe UI", arial, verdana, "lucida sans unicode", tahoma, sans-serif;
-  color: #fbfbfb;
+  margin: 0;
+  background: var(--bg);
+  font-family: "Open Sans", "Segoe UI", system-ui, -apple-system, arial, sans-serif;
+  color: var(--fg);
+  display: flex;
+  flex-direction: column;
 }
-p.contact {
-  font-size: 20px;
+
+/* slow ambient glow behind the hero */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: radial-gradient(ellipse 80% 60% at 50% 35%, #1c1c1c 0%, var(--bg) 70%);
+  animation: ambient 18s ease-in-out infinite alternate;
 }
-p.new {
-  font-size: 22px;
-  padding-bottom: 10px;
+
+@keyframes ambient {
+  from { transform: translate(-3%, -2%) scale(1.05); opacity: 0.9; }
+  to   { transform: translate(3%, 2%) scale(1.12); opacity: 1; }
 }
-@media screen and (min-height: 600px) {
-p.logo {
-  margin-top: 10em;
+
+.hero {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem 1rem;
 }
+
+/* ---- Logo: blades spin in one by one, wordmark follows, then a gentle float ---- */
+.logo {
+  width: min(352px, 80vw);
+  height: auto;
+  margin-bottom: 2em;
+  overflow: visible;
+  animation: logo-float 6s ease-in-out 1.6s infinite alternate;
 }
-img {
-  padding-bottom: 2em;
+
+@keyframes logo-float {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-8px); }
 }
-.footer {
-      position:absolute;
-      bottom: 0px;
-      float: right;
-      height: 35px;
-      margin: 0px 50px 0px 0px;
-      color: #777;
-      text-align: right;
-      padding: 10px 30px;
-      z-index: -1;
-  }
-a, a:hover, a:active, a:visited, strong {
+
+.blade {
+  transform-box: view-box;
+  transform-origin: 166px 151px;
+  opacity: 0;
+  animation: blade-in 0.8s cubic-bezier(0.22, 1.35, 0.36, 1) forwards;
+}
+
+/* clockwise: top, right, bottom, left */
+.blade-orange { animation-delay: 0.10s; }
+.blade-blue   { animation-delay: 0.22s; }
+.blade-red    { animation-delay: 0.34s; }
+.blade-green  { animation-delay: 0.46s; }
+
+@keyframes blade-in {
+  from { opacity: 0; transform: rotate(-120deg) scale(0); }
+  45%  { opacity: 1; }
+  to   { opacity: 1; transform: rotate(0deg) scale(1); }
+}
+
+.wordmark {
+  opacity: 0;
+  animation: fade-up 0.7s ease-out 0.95s forwards;
+}
+
+/* hover: the pinwheel takes a spin */
+.pinwheel {
+  transform-box: view-box;
+  transform-origin: 166px 151px;
+}
+.logo:hover .pinwheel {
+  animation: pinwheel-spin 1.1s cubic-bezier(0.45, 0, 0.2, 1);
+}
+@keyframes pinwheel-spin {
+  to { transform: rotate(360deg); }
+}
+.logo:hover { filter: drop-shadow(0 0 24px rgba(255, 255, 255, 0.12)); }
+
+/* ---- Staggered entrance for the rest of the page ---- */
+.reveal {
+  opacity: 0;
+  animation: fade-up 0.7s ease-out forwards;
+}
+.tagline.reveal { animation-delay: 1.2s; }
+.new.reveal { animation-delay: 1.35s; }
+.companies.reveal { animation-delay: 1.5s; }
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.tagline {
+  font-size: clamp(1.15rem, 3.5vw, 1.5rem);
+  font-weight: 600;
+  margin: 0 0 0.5em;
+}
+
+.new {
+  font-size: clamp(1rem, 3vw, 1.375rem);
+  margin: 0 0 1.25em;
+  color: #cfcfcf;
+}
+
+/* ---- Company cards ---- */
+.companies {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: min(44em, 92vw);
+}
+
+@media (max-width: 560px) {
+  .companies { grid-template-columns: 1fr; }
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  text-decoration: none;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-left: 4px solid var(--accent, #fff);
+  transition: transform 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.card:hover, .card:focus-visible {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--accent);
+}
+
+.card:focus-visible { outline: none; }
+
+.card-blue   { --accent: #00598c; }
+.card-orange { --accent: #e6892f; }
+.card-green  { --accent: #27a44a; }
+.card-red    { --accent: #e42842; }
+
+.card-name {
+  font-weight: 600;
+  font-size: 1.05rem;
   color: #fff;
 }
-.search_categories{
-  font-family: "Open Sans", "lucida grande", "Segoe UI", arial, verdana, "lucida sans unicode", tahoma, sans-serif;
-  color: #fbfbfb;
-  font-size: 13px;
-  padding: 10px 8px 10px 14px;
-  background: #fff;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  position: relative;
-  max-width: 25em;
+
+.card-desc {
+  font-size: 0.85rem;
+  color: #9a9a9a;
 }
-.search_categories .select{
-  width: 100%;
+
+a, a:hover, a:active, a:visited, strong { color: #fff; }
+
+.footer {
+  color: var(--muted);
+  text-align: center;
+  padding: 14px;
+  font-size: 0.875rem;
 }
-.search_categories .select select{
-  background: transparent;
-  line-height: 1;
-  border: 0;
-  padding: 0;
-  border-radius: 0;
-  width: 100%;
-  position: relative;
-  z-index: 10;
-  font-size: 1em;
+
+/* ---- Accessibility: respect reduced-motion preference ---- */
+@media (prefers-reduced-motion: reduce) {
+  .logo, .reveal, .blade, .wordmark, .logo:hover .pinwheel {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .card, body::before { transition: none; animation: none; }
 }
